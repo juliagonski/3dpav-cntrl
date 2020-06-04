@@ -40,19 +40,25 @@ class MyWindow:
     self.btn4.place(x=180, y=250)
 
     self.printer = None
+    self.lookup = None
+    self.started_run = False
+    self.ventilating = False
 
   def init(self):
     g_init(self)
 
   def run(self):
+    self.started_run = True
     sel_tv=self.tv.get()
     sel_rr=self.rr.get()
     sel_ie=self.ie.get()
     print('initialize with tv ', sel_tv, ' and rr ', sel_rr, ' and ie ' , sel_ie)
-    print('run')
+    self.lookup = tv+"mL_"+rr+"BPM_"+ie+"to2"
+    g_run(self)
 
   def stop(self):
     print('stop')
+    g_stop(self)
 
   def connect(self):
     if self.txtfld.get() == '': path = '/Users/juliagonski/Documents/Columbia/3DprinterAsVentilator/pronsoleWork/Printator/sim'
@@ -62,17 +68,14 @@ class MyWindow:
     print("Connecting to printer...")
     time.sleep(2)  # Allow time for response
     buffer_bytes = ser_printer.inWaiting()
-    response = ser_printer.read(buffer_bytes)  # Read data in the buffer
-    print("Connection response from printer:")
-    print(response)
+    print("Connection response from printer:", ser_printer.read(buffer_bytes))
     print("Asking for done moving okay...")
     ser_printer.write(str.encode('M400\n'))
+    #print("immediate Ok response from printer: ", ser_printer.readline())
     time.sleep(0.1)  # Allow time for response
-    print("Ok response from printer:")
-    response = ser_printer.readline()
-    print(response)
+    print("time.sleep response from printer: ", ser_printer.readline())
     self.printer=ser_printer
-    print("------ Done initializing!")
+    print("------ Done connecting!")
     print("")
     
 

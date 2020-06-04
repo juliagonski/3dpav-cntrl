@@ -1,8 +1,23 @@
+import time
+
 d_protocol_inhale={
-"400mL_16BPM_1to2":"G1 F2500 Z116 Y100 E14"
+"250mL_14BPM_1to2":"G0 F2600 Z32\n",
+"400mL_14BPM_1to2":"G1 F2800 Z126 Y90 E14\n",
+"400mL_16BPM_1to2":"G1 F2500 Z116 Y100 E14\n",
+"500mL_12BPM_1to2":"G0 F2600 Z5\n",
+"600mL_9BPM_1to2":"G0 F2600 Z0\n",
+"1000mL_4BPM_1to2":"G0 F1200 Z85 Y90\n",
+"1000mL_8BPM_1to2":"G1 F2400 Z50 E85\n",
+
 }
 d_protocol_exhale={
-"400mL_16BPM_1to2":"G1 F1250 Z130 Y145 E-14"
+"250mL_14BPM_1to2":"G0 F1300 Z82\n",
+"400mL_14BPM_1to2":"G1 F1400 Z140 Y150 E-14\n",
+"400mL_16BPM_1to2":"G1 F1250 Z130 Y145 E-14\n",
+"500mL_12BPM_1to2":"G0 F1300 Z80\n",
+"600mL_9BPM_1to2":"G0 F1300 Z82\n",
+"1000mL_4BPM_1to2":"G0 F600 Z125 Y175\n",
+"1000mL_8BPM_1to2":"G1 F1200 Z135 E-85\n",
 }
 
 def g_init(self):
@@ -43,19 +58,34 @@ def g_init(self):
   print(";move z1 and z2 together to decompress position")
   self.printer.write(str.encode("G28 Y\n"))
   print(";home y")
+  print('response???? ', self.printer.readline())
   self.printer.write(str.encode("G1 F2000 Y150\n"))
   print(";move y to decompress position")
+  print('response???? ', self.printer.readline())
   self.printer.write(str.encode("M0 ADD BUNGEE TO CONT.\n"))
   print(";M400")
+  print('response???? ', self.printer.readline())
   self.printer.write(str.encode('M400\n'))
-  print("------ Done initializing!")
+  print('response???? ', self.printer.readline())
+
+  time.sleep(0.1)  # Allow time for response
+  response = self.printer.readline()
+  print(response)
+  if 'ok' in response.decode('ascii'): print("------ Done initializing!")
   print("")
 
 def g_run(self, tv, rr, ie):
-  lookup = tv+"mL_"+rr+"BPM_"+ie+"to2"
-  compress = d_protocol_inhale[lookup]
-  decompress = d_protocol_exhale[lookup]
-  print('compress: ', compress, ', decompress: ', decompress)
-  
+  if lookup in d_protocol_inhale.keys():
+    compress = d_protocol_inhale[self.lookup]
+    decompress = d_protocol_exhale[self.lookup]
+    print('compress: ', compress, ', decompress: ', decompress)
+  else: print('No ventilation protocol for this choice of settings!')
+ 
+  self.printer.write(str.encode(compress)) 
+  self.printer.write(str.encode(decompress)) 
+  self.printer.write(str.encode('M400\n'))
 
+def g_stop(self):
+  print('Stopping on exhale')
+  self.printer.write(str.encode(d_protocol_exhale[self.lookup])) 
 
