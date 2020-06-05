@@ -58,24 +58,20 @@ def g_init(self):
   print(";move z1 and z2 together to decompress position")
   self.printer.write(str.encode("G28 Y\n"))
   print(";home y")
-  print('response???? ', self.printer.readline())
   self.printer.write(str.encode("G1 F2000 Y150\n"))
   print(";move y to decompress position")
-  print('response???? ', self.printer.readline())
   self.printer.write(str.encode("M0 ADD BUNGEE TO CONT.\n"))
   print(";M400")
-  print('response???? ', self.printer.readline())
   self.printer.write(str.encode('M400\n'))
-  print('response???? ', self.printer.readline())
 
-  time.sleep(0.1)  # Allow time for response
-  response = self.printer.readline()
-  print(response)
-  if 'ok' in response.decode('ascii'): print("------ Done initializing!")
-  print("")
+  answer = self.waitForOk(self.printer)
 
-def g_run(self, tv, rr, ie):
-  if lookup in d_protocol_inhale.keys():
+  if 'ok' in answer.decode("utf-8", "ignore"):
+    print("------ Done initializing!")
+    print("")
+
+def g_run(self):
+  if self.lookup in d_protocol_inhale.keys():
     compress = d_protocol_inhale[self.lookup]
     decompress = d_protocol_exhale[self.lookup]
     print('compress: ', compress, ', decompress: ', decompress)
@@ -88,4 +84,6 @@ def g_run(self, tv, rr, ie):
 def g_stop(self):
   print('Stopping on exhale')
   self.printer.write(str.encode(d_protocol_exhale[self.lookup])) 
+  self.started_run = False
+  self.ventilating = False
 
