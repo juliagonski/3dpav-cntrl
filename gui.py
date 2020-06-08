@@ -25,10 +25,10 @@ class MyWindow:
     self.txtfld.place(x=150, y=20)
     #self.place_btn(win,"Connect printer", self.connect,60,50)
     #self.place_btn(win,"Initialize run", self.initialize,60,130)
-    self.btn=Button(win, text="Connect printer", command=self.connect)
-    self.btn.place(x=60, y=50)
-    self.btn2=Button(win, text="Initialize", command=self.initialize)
-    self.btn2.place(x=60, y=130)
+    self.btn_cnct=Button(win, text="Connect printer", command=self.connect)
+    self.btn_cnct.place(x=60, y=50)
+    self.btn_init=Button(win, text="Initialize", command=self.initialize, state=DISABLED)
+    self.btn_init.place(x=60, y=130)
 
     self.tidal_vol=("300", "400", "500", "750","900", "1000")
     self.lab_tv=Label(win, text='Tidal volume:')
@@ -36,7 +36,7 @@ class MyWindow:
     self.tv=Combobox(win, values=self.tidal_vol)
     self.tv.place(x=240, y=180)
 
-    self.resp_rate=("12", "16", "32")
+    self.resp_rate=("4","8","9","12", "16", "32")
     self.lab_rr=Label(win, text='Respiratory rate:')
     self.lab_rr.place(x=60, y=210)
     self.rr=Combobox(win, values=self.resp_rate)
@@ -48,10 +48,10 @@ class MyWindow:
     self.ie=Combobox(win, values=self.insp_exp)
     self.ie.place(x=240, y=240)
 
-    self.btn3=Button(win, text="Run Ventilation", command=self.run)
-    self.btn3.place(x=60, y=290)
-    self.btn4=Button(win, text="Stop",command=self.stop)
-    self.btn4.place(x=180, y=290)
+    self.btn_run=Button(win, text="Run Ventilation", command=self.run,state=DISABLED)
+    self.btn_run.place(x=60, y=290)
+    self.btn_stop=Button(win, text="Stop",command=self.stop,state=DISABLED)
+    self.btn_stop.place(x=180, y=290)
 
     #TODO
     #self.place_dropdown(win,'Tidal volume:', self.tidal_vol, 60, 180) 
@@ -69,7 +69,7 @@ class MyWindow:
     self.check_run(win)
 
 
-  #--------- aesthetics
+  #------------------------- aesthetics
   def place_dropdown(self, win, txt, vals, xstart=60, ystart=180):
     self.lab=Label(win, text=txt)
     self.lab.place(x=xstart, y=ystart)
@@ -81,9 +81,34 @@ class MyWindow:
 
     
 
-  #--------- ventilator methods
+  #-------------------------- ventilator methods
+  def connect(self):
+    if self.txtfld.get() == '': path = '/Users/juliagonski/Documents/Columbia/3DprinterAsVentilator/pronsoleWork/Printator/sim'
+    else: path = self.txtfld.get()
+    ser_printer = serial.Serial(path, baudRate)
+
+    print("Connecting to printer...")
+    time.sleep(1)  # Allow time for response
+    print("Connection response from printer:", ser_printer.read(ser_printer.inWaiting()))
+    ser_printer.write(str.encode('G1 F1400 Z140 Y150 E-14\n'))
+    answer2 = self.waitForOk(ser_printer)
+    print("answer2: ", answer2, ' Test M400, wait for done moving okay...')
+    ser_printer.write(str.encode('M400\n'))
+    ser_printer.write(str.encode('M400\n'))
+    #print('answer of move commmand before M400: ', answer2, ", and original M400 answer: ", answer)
+    #time.sleep(1000)  # Allow time for response
+    answer = self.waitForOk(ser_printer)
+
+    if 'ok' in answer.decode("utf-8", "ignore"):
+      print("------ Done connecting!")
+      print("")
+    self.printer=ser_printer
+    self.btn_init["state"] = "normal"
+    
+
   def initialize(self):
     g_init(self)
+    self.btn_run["state"] = "normal"
 
   def check_run(self, win):
     if self.started_run == 1:
@@ -102,12 +127,14 @@ class MyWindow:
     print('initialize with tv ', sel_tv, ' and rr ', sel_rr, ' and ie ' , sel_ie)
     self.lookup = sel_tv+"mL_"+sel_rr+"BPM_"+sel_ie+"to2"
     g_run(self)
+    self.btn_stop["state"] = "normal"
 
   def stop(self):
     print('stop')
     g_stop(self)
 
   def waitForOk(self, ser_printer):
+    print('BEGIN waitForOk')
     answer = ""
     quantity = ser_printer.inWaiting()
     while True:
@@ -120,31 +147,13 @@ class MyWindow:
                time.sleep(read_timeout) 
         quantity = ser_printer.inWaiting()
         if quantity == 0:
-               print('quantity==0, done reading out')
-               print('ERROR connecting!!!')
-               raise ImportError()
-               break
+               print('-------> No lines to read out')
+               #print('ERROR connecting!!!')
+               #raise ImportError()
+               #break
     print('resulting answer: ', answer)
     return answer
 
-
-  def connect(self):
-    if self.txtfld.get() == '': path = '/Users/juliagonski/Documents/Columbia/3DprinterAsVentilator/pronsoleWork/Printator/sim'
-    else: path = self.txtfld.get()
-    ser_printer = serial.Serial(path, baudRate)
-
-    print("Connecting to printer...")
-    time.sleep(1)  # Allow time for response
-    print("Connection response from printer:", ser_printer.read(ser_printer.inWaiting()))
-    ser_printer.write(str.encode('M400\n'))
-    print("Test M400, wait for done moving okay...")
-    answer = self.waitForOk(ser_printer)
-
-    if 'ok' in answer.decode("utf-8", "ignore"):
-      print("------ Done connecting!")
-      print("")
-    self.printer=ser_printer
-    
 
 #-------------------------------------------------------------------------
 def main():
