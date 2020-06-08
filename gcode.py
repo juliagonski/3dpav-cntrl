@@ -63,8 +63,14 @@ def g_init(self):
   self.printer.write(str.encode("M0 ADD BUNGEE TO CONT.\n"))
   print(";M400")
   self.printer.write(str.encode('M400\n'))
+  self.printer.write(str.encode('M400\n'))
 
+  #answer2 = self.waitForOk(self.printer)
+  time.sleep(5) #each command should give an immediate okay, except the second M400
+  self.printer.flushInput()
+  #self.printer.flushOutput()
   answer = self.waitForOk(self.printer)
+  #print('answer2:', len(answer2),', answer: ', len(answer))
 
   if 'ok' in answer.decode("utf-8", "ignore"):
     print("------ Done initializing!")
@@ -79,6 +85,7 @@ def g_run(self):
  
   self.printer.write(str.encode(compress)) 
   self.printer.write(str.encode(decompress)) 
+  self.printer.write(str.encode('M400\n'))
   self.printer.write(str.encode('M400\n'))
 
 def g_stop(self):

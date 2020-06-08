@@ -11,7 +11,7 @@ from gcode import *
 # 0.1 sec + 1.0 sec / baud rate (bits per second) * 10.0 bits (per character) * 10.0 times
 # example for 115200 baud rate:
 # 0.1 + 1.0 / 115200 * 10.0 * 10.0 ~ 0.1 sec
-read_timeout = 0.1
+read_timeout = 0.5
 baudRate = 115200
 
 #class MyWindow(Frame):
@@ -90,14 +90,9 @@ class MyWindow:
     print("Connecting to printer...")
     time.sleep(1)  # Allow time for response
     print("Connection response from printer:", ser_printer.read(ser_printer.inWaiting()))
-    ser_printer.write(str.encode('G1 F1400 Z140 Y150 E-14\n'))
-    answer2 = self.waitForOk(ser_printer)
-    print("answer2: ", answer2, ' Test M400, wait for done moving okay...')
     ser_printer.write(str.encode('M400\n'))
     ser_printer.write(str.encode('M400\n'))
-    #print('answer of move commmand before M400: ', answer2, ", and original M400 answer: ", answer)
-    #time.sleep(1000)  # Allow time for response
-    answer = self.waitForOk(ser_printer)
+    answer = ser_printer.readline()
 
     if 'ok' in answer.decode("utf-8", "ignore"):
       print("------ Done connecting!")
@@ -120,6 +115,7 @@ class MyWindow:
     win.after(4000,self.check_run,win)
 
   def run(self):
+    print('Started run!')
     self.started_run = True
     sel_tv=self.tv.get()
     sel_rr=self.rr.get()
@@ -137,6 +133,7 @@ class MyWindow:
     print('BEGIN waitForOk')
     answer = ""
     quantity = ser_printer.inWaiting()
+    #ser_printer.flushOutput()
     while True:
         if quantity > 0:
                answer += ser_printer.read(quantity)
