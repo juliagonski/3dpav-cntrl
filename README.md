@@ -2,7 +2,7 @@
 
 1. Getting the code:
 
-`git clone https://github.com/juliagonski/3dpav-cntrl.git`
+`git clone -b dev_signals https://github.com/juliagonski/3dpav-cntrl.git`
 
 2. Run the gui: 
 `python gui.py`
