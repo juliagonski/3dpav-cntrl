@@ -56,7 +56,6 @@ def g_run(self,lookup,debug=False):
     print('ERROR!!!! --------------> No ventilation protocol for this choice of settings!')
     #return ''
 
-
   print('g_run, isOk: ', self.isOk)
   self.waitForOk(self.printer)
   print('g_run,after waitForOk, isOkL ', self.isOk)

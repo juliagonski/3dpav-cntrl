@@ -1,5 +1,6 @@
 import serial
 import time
+import _thread
 import argparse
 import threading
 
@@ -13,7 +14,7 @@ from gcode import *
 # 0.1 sec + 1.0 sec / baud rate (bits per second) * 10.0 bits (per character) * 10.0 times
 # example for 115200 baud rate:
 # 0.1 + 1.0 / 115200 * 10.0 * 10.0 ~ 0.1 sec
-read_timeout = 0.1
+read_timeout = 0.2
 baudRate = 115200
 
 #class MyWindow(Frame):
@@ -81,11 +82,12 @@ class MyWindow(object):
   def isOk(self, new_value):
     if self.debug: print('isOk being updated!')
     self._isOk = new_value
-    if self.debug: print('are we running again?')
+    #if self.debug: print('are we running again?')
     if self.started_run and new_value == True: 
-      print('yep')
-      g_run(self, self.lookup, self.debug)
-    else: print('nope')
+      #print('yep')
+      #g_run(self, self.lookup, self.debug)
+      _thread.start_new_thread(g_run, (self, self.lookup, self.debug))
+    #else: print('nope')
 
 
   #------------------------- aesthetics
@@ -132,6 +134,8 @@ class MyWindow(object):
   #  win.after(2000,self.check_run,win)
 
   def start_run(self):
+    self.printer.flushInput()
+    self.printer.flushOutput()
     self.started_run = True
     sel_tv=self.tv.get()
     sel_rr=self.rr.get()
@@ -144,8 +148,8 @@ class MyWindow(object):
     #self.thread = threading.Thread(target=self.run())
     self.run()
     #self.thread.start()
-    #thread = threading.Thread(target=self.run())
-    #thread.start()
+    #self.thread = threading.Thread(target=self.run())
+    #self.thread.start()
 
     
   def run(self):
@@ -181,8 +185,8 @@ class MyWindow(object):
         else:
                time.sleep(read_timeout) 
         quantity = ser_printer.inWaiting()
-        if quantity == 0:
-               if self.debug: print('-------> No lines to read out')
+        #if quantity == 0:
+               #if self.debug: print('-------> No lines to read out')
                #print('ERROR connecting!!!')
                #raise ImportError()
                #break
