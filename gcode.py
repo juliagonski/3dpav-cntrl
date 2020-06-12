@@ -42,10 +42,11 @@ def g_init(self,debug=False):
     print("------ Done initializing!")
     print("")
 
-def g_run(self,debug=False):
-  if self.lookup in d_protocol_inhale.keys():
-    compress = d_protocol_inhale[self.lookup]
-    decompress = d_protocol_exhale[self.lookup]
+def g_run(self,lookup,debug=False):
+  #self.isOk = False
+  if lookup in d_protocol_inhale.keys():
+    compress = d_protocol_inhale[lookup]
+    decompress = d_protocol_exhale[lookup]
     if debug: print('compress: ', compress, ', decompress: ', decompress)
     self.printer.write(str.encode(compress)) 
     self.printer.write(str.encode(decompress)) 
@@ -56,7 +57,10 @@ def g_run(self,debug=False):
     #return ''
 
 
-  return self.waitForOk(self.printer)
+  print('g_run, isOk: ', self.isOk)
+  self.waitForOk(self.printer)
+  print('g_run,after waitForOk, isOkL ', self.isOk)
+  return ''
   
 
 def g_stop(self,debug=False):

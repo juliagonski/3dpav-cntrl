@@ -1,6 +1,7 @@
 import serial
 import time
 import argparse
+import threading
 
 from tkinter import *
 from tkinter.ttk import Combobox
@@ -18,7 +19,7 @@ baudRate = 115200
 #class MyWindow(Frame):
 #  def __init__(self, master=None):
 #    Frame.__init__(self, master)
-class MyWindow:
+class MyWindow(object):
   def __init__(self, win,debug=False):  
     self.debug = debug
     self.lab=Label(win, text="Serial port:")
@@ -50,7 +51,7 @@ class MyWindow:
     self.ie=Combobox(win, values=self.insp_exp)
     self.ie.place(x=240, y=240)
 
-    self.btn_run=Button(win, text="Run Ventilation", command=self.run,state=DISABLED)
+    self.btn_run=Button(win, text="Run Ventilation", command=self.start_run,state=DISABLED)
     self.btn_run.place(x=60, y=310)
     self.btn_stop=Button(win, text="Stop",command=self.stop,state=DISABLED)
     self.btn_stop.place(x=180, y=310)
@@ -66,8 +67,25 @@ class MyWindow:
     self.printer = None
     self.lookup = None
     self.started_run = False
+
     # initial time display
-    self.check_run(win)
+    #self.check_run(win)
+    # a smarter way to do this ! 
+    self._isOk = False
+
+  @property 
+  def isOk(self):
+    return self._isOk
+
+  @isOk.setter
+  def isOk(self, new_value):
+    if self.debug: print('isOk being updated!')
+    self._isOk = new_value
+    if self.debug: print('are we running again?')
+    if self.started_run and new_value == True: 
+      print('yep')
+      g_run(self, self.lookup, self.debug)
+    else: print('nope')
 
 
   #------------------------- aesthetics
@@ -105,19 +123,15 @@ class MyWindow:
     g_init(self,self.debug)
     self.btn_run["state"] = "normal"
 
-  def check_run(self, win):
-    if self.started_run == 1:
-      answer = self.waitForOk(self.printer)
-      if self.debug: print("waiting response from printer?", answer)
-      if 'ok' in answer.decode("utf-8", "ignore"): g_run(self,self.debug)
-      #else: print('not ventilating, not adding more runs')
-    win.after(2000,self.check_run,win)
+  #def check_run(self, win):
+  #  if self.started_run == 1:
+  #    answer = self.waitForOk(self.printer)
+  #    if self.debug: print("waiting response from printer?", answer)
+  #    if 'ok' in answer.decode("utf-8", "ignore"): g_run(self,self.debug)
+  #    #else: print('not ventilating, not adding more runs')
+  #  win.after(2000,self.check_run,win)
 
   def start_run(self):
-    self.started_run = True
-    self.run()
-
-  def run(self):
     self.started_run = True
     sel_tv=self.tv.get()
     sel_rr=self.rr.get()
@@ -126,21 +140,34 @@ class MyWindow:
     self.lookup = sel_tv+"mL_"+sel_rr+"BPM"
     print('Started new protocol: '+str(self.lookup))
     self.btn_stop["state"] = "normal"
+    #answer = g_run(self,self.debug) 
+    #self.thread = threading.Thread(target=self.run())
+    self.run()
+    #self.thread.start()
+    #thread = threading.Thread(target=self.run())
+    #thread.start()
 
-    g_run(self,self.debug)
-
-    #answer = g_run(self)  
-    #while self.started_run == True:
-      #if 'ok' in answer.decode("utf-8", "ignore"):
-      #  print("------ Done one compress/decompress, adding another")
-      #  answer = g_run(self)
-      
+    
+  def run(self):
+    print('Before g_run: isOK?????????????' , self.isOk)
+    #self.isOk = False 
+    answer = g_run(self, self.lookup, self.debug)
+    #if 'ok' in answer.decode("utf-8", "ignore"):
+    #  print("------ Done one compress/decompress, adding another")
+    #  self.isOk = True
+    
+    #while True:
+    #  if self.started_run and self.printer.inWaiting()>0: 
+    #    if 'ok' in answer.decode("utf-8", "ignore"):
+    #      print("------ Done one compress/decompress, adding another")
+    #  time.sleep(0.01) 
 
   def stop(self):
     g_stop(self,self.debug)
 
   def waitForOk(self, ser_printer):
     if self.debug: print('BEGIN waitForOk')
+    self.isOk = False
     answer = ""
     quantity = ser_printer.inWaiting()
     #ser_printer.flushOutput()
@@ -149,6 +176,7 @@ class MyWindow:
                answer += ser_printer.read(quantity)
                if 'ok' in answer.decode("utf-8", "ignore"): 
                  if self.debug: print('found ok, breaking')
+                 self.isOk = True
                  break
         else:
                time.sleep(read_timeout) 
