@@ -38,7 +38,8 @@ def g_init(self,debug=False):
   answer = self.waitForOk(self.printer)
   #print('answer2:', len(answer2),', answer: ', len(answer))
 
-  if 'ok' in answer.decode("utf-8", "ignore"):
+  #if 'ok' in answer.decode("utf-8", "ignore"):
+  if 'ok' in answer:
     print("------ Done initializing!")
     print("")
 
@@ -56,9 +57,7 @@ def g_run(self,lookup,debug=False):
     print('ERROR!!!! --------------> No ventilation protocol for this choice of settings!')
     #return ''
 
-  print('g_run, isOk: ', self.isOk)
   self.waitForOk(self.printer)
-  print('g_run,after waitForOk, isOkL ', self.isOk)
   return ''
   
 

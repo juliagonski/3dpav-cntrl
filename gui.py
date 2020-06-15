@@ -104,7 +104,7 @@ class MyWindow(object):
 
   #-------------------------- ventilator methods
   def connect(self):
-    if self.txtfld.get() == '': path = '/Users/juliagonski/Documents/Columbia/3DprinterAsVentilator/pronsoleWork/Printator/sim'
+    if self.txtfld.get() == '': path = 'COM3'
     else: path = self.txtfld.get()
     ser_printer = serial.Serial(path, baudRate)
 
@@ -153,7 +153,6 @@ class MyWindow(object):
 
     
   def run(self):
-    print('Before g_run: isOK?????????????' , self.isOk)
     #self.isOk = False 
     answer = g_run(self, self.lookup, self.debug)
     #if 'ok' in answer.decode("utf-8", "ignore"):
@@ -177,8 +176,9 @@ class MyWindow(object):
     #ser_printer.flushOutput()
     while True:
         if quantity > 0:
-               answer += ser_printer.read(quantity)
-               if 'ok' in answer.decode("utf-8", "ignore"): 
+               answer += ser_printer.read(quantity).decode("utf-8","ignore")
+               #if 'ok' in answer.decode("utf-8", "ignore"): 
+               if 'ok' in answer: 
                  if self.debug: print('found ok, breaking')
                  self.isOk = True
                  break

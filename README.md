@@ -13,4 +13,7 @@
 - `Initialize`: set printer to home. 
 - `Run`: starts ventilation based on selected TV, RR, and IE.
 - `Stops`: adds an extra exhale to ensure we don't stop the ventilation on a compression, and stops the ventilation. 
--- 
+
+
+# On Windows 
+"C:\Program Files (x86)\Vim\vim82\gvim.exe" gui.py
