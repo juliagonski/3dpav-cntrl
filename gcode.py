@@ -1,22 +1,23 @@
 import time
+import threading
 
 d_protocol_inhale={
-"300mL_32BPM":"G1 F4300 Z12 Y35\n",
-"400mL_12BPM":"G1 F2500 Z14 Y45\n",
-"400mL_32BPM":"G1 F6000 Z14 Y45\n",
-"500mL_12BPM":"G1 F2000 Z17 Y49\n",
-"750mL_20BPM":"G1 F5000 Z23 Y69\n",
-"900mL_16BPM":"G1 F4600 Z30 Y76\n",
-"1000mL_12BPM":"G1 F3800 Z33 Y85\n",
+"300mL_32BPM":"G1 F4600 Z13 Y39\n",
+"400mL_12BPM":"G1 F2100 Z17 Y51\n",
+"400mL_32BPM":"G1 F6200 Z17 Y51\n",
+"500mL_12BPM":"G1 F2400 Z19 Y57\n",
+"750mL_20BPM":"G1 F5800 Z27 Y81\n",
+"900mL_16BPM":"G1 F5500 Z32 Y96\n",
+"1000mL_12BPM":"G1 F4500 Z35 Y105\n",
 }
 d_protocol_exhale={
-"300mL_32BPM":"G1 F2150 Z0 Y0\n",
-"400mL_12BPM":"G1 F1250 Z0 Y0\n",
-"400mL_32BPM":"G1 F3000 Z0 Y0\n",
-"500mL_12BPM":"G1 F1000 Z0 Y0\n",
-"750mL_20BPM":"G1 F2500 Z0 Y0\n",
-"900mL_16BPM":"G1 F2300 Z0 Y0\n",
-"1000mL_12BPM":"G1 F1900 Z0 Y0\n",
+"300mL_32BPM":"G1 F2300 Z0 Y0\n",
+"400mL_12BPM":"G1 F1050 Z0 Y0\n",
+"400mL_32BPM":"G1 F3100 Z0 Y0\n",
+"500mL_12BPM":"G1 F1200 Z0 Y0\n",
+"750mL_20BPM":"G1 F2900 Z0 Y0\n",
+"900mL_16BPM":"G1 F2750 Z0 Y0\n",
+"1000mL_12BPM":"G1 F2250 Z0 Y0\n",
 }
 
 def g_init(self,debug=False):
@@ -44,6 +45,7 @@ def g_init(self,debug=False):
 
 def g_run(self,lookup,debug=False):
   #self.isOk = False
+  print('number active threads? ', threading.active_count())
   if lookup in d_protocol_inhale.keys():
     compress = d_protocol_inhale[lookup]
     decompress = d_protocol_exhale[lookup]

@@ -46,7 +46,7 @@ class MyWindow(object):
     self.rr=Combobox(win, values=self.resp_rate)
     self.rr.place(x=240, y=210)
 
-    self.insp_exp=("1")
+    self.insp_exp=("1:2")
     self.lab_ie=Label(win, text='Inspiratory/expiratory:')
     self.lab_ie.place(x=60, y=240)
     self.ie=Combobox(win, values=self.insp_exp)
@@ -80,13 +80,14 @@ class MyWindow(object):
 
   @isOk.setter
   def isOk(self, new_value):
-    if self.debug: print('isOk being updated!')
+    if self.debug: print('isOk being updated to '+str(new_value))
     self._isOk = new_value
     #if self.debug: print('are we running again?')
     if self.started_run and new_value == True: 
-      #print('yep')
+      print('adding another run thread')
       #g_run(self, self.lookup, self.debug)
       _thread.start_new_thread(g_run, (self, self.lookup, self.debug))
+      #threading.Thread(target=g_run(self,self.lookup, self.debug)).start()
     #else: print('nope')
 
 
@@ -167,12 +168,14 @@ class MyWindow(object):
     #  time.sleep(0.01) 
 
   def stop(self):
+    self.printer.flushInput()
+    self.printer.flushOutput()
     g_stop(self,self.debug)
 
   def waitForOk(self, ser_printer):
     if self.debug: print('BEGIN waitForOk')
     self.isOk = False
-    answer = ""
+    answer = ''
     quantity = ser_printer.inWaiting()
     #ser_printer.flushOutput()
     while True:
