@@ -1,6 +1,7 @@
 import serial
 import time
 import _thread
+from threading import Thread
 import argparse
 import threading
 
@@ -14,7 +15,8 @@ from gcode import *
 # 0.1 sec + 1.0 sec / baud rate (bits per second) * 10.0 bits (per character) * 10.0 times
 # example for 115200 baud rate:
 # 0.1 + 1.0 / 115200 * 10.0 * 10.0 ~ 0.1 sec
-read_timeout = 0.2
+#read_timeout = 0.2 #as of June 17, this is too long
+read_timeout = 3
 baudRate = 115200
 
 #class MyWindow(Frame):
@@ -80,15 +82,16 @@ class MyWindow(object):
 
   @isOk.setter
   def isOk(self, new_value):
-    if self.debug: print('isOk being updated to '+str(new_value))
+    print('isOk being updated to '+str(new_value))
     self._isOk = new_value
-    #if self.debug: print('are we running again?')
+    #if self.started_run and new_value == True: 
     if self.started_run and new_value == True: 
-      print('adding another run thread')
-      #g_run(self, self.lookup, self.debug)
-      _thread.start_new_thread(g_run, (self, self.lookup, self.debug))
+      print('adding another run thread with '+str(self.lookup))
+      #_thread.start_new_thread(g_run, (self, self.lookup, self.debug))
       #threading.Thread(target=g_run(self,self.lookup, self.debug)).start()
-    #else: print('nope')
+      t = Thread(target = g_run, args =(self,self.lookup,self.debug )) 
+      t.start() 
+      t.join()
 
 
   #------------------------- aesthetics
@@ -135,46 +138,27 @@ class MyWindow(object):
   #  win.after(2000,self.check_run,win)
 
   def start_run(self):
-    self.printer.flushInput()
-    self.printer.flushOutput()
+    self.printer.flush()
     self.started_run = True
     sel_tv=self.tv.get()
     sel_rr=self.rr.get()
     sel_ie=self.ie.get()
-    #self.lookup = sel_tv+"mL_"+sel_rr+"BPM_"+sel_ie+"to2"
-    self.lookup = sel_tv+"mL_"+sel_rr+"BPM"
+    self.lookup = sel_tv+"mL_"+sel_rr+"BPM_"+sel_ie
+    #self.lookup = sel_tv+"mL_"+sel_rr+"BPM"
     print('Started new protocol: '+str(self.lookup))
     self.btn_stop["state"] = "normal"
-    #answer = g_run(self,self.debug) 
-    #self.thread = threading.Thread(target=self.run())
-    self.run()
-    #self.thread.start()
-    #self.thread = threading.Thread(target=self.run())
-    #self.thread.start()
-
-    
-  def run(self):
-    print('Before g_run: isOK?????????????' , self.isOk)
-    #self.isOk = False 
-    answer = g_run(self, self.lookup, self.debug)
-    #if 'ok' in answer.decode("utf-8", "ignore"):
-    #  print("------ Done one compress/decompress, adding another")
-    #  self.isOk = True
-    
-    #while True:
-    #  if self.started_run and self.printer.inWaiting()>0: 
-    #    if 'ok' in answer.decode("utf-8", "ignore"):
-    #      print("------ Done one compress/decompress, adding another")
-    #  time.sleep(0.01) 
+    #g_run(self, self.lookup, self.debug)
+    t_orig = Thread(target = g_run, args =(self,self.lookup,self.debug )) 
+    t_orig.start() 
 
   def stop(self):
-    self.printer.flushInput()
-    self.printer.flushOutput()
+    self.started_run = False
+    self.printer.flush()
     g_stop(self,self.debug)
 
   def waitForOk(self, ser_printer):
     if self.debug: print('BEGIN waitForOk')
-    self.isOk = False
+    isItOk = False
     answer = ''
     quantity = ser_printer.inWaiting()
     #ser_printer.flushOutput()
@@ -183,10 +167,10 @@ class MyWindow(object):
                answer += ser_printer.read(quantity)
                if 'ok' in answer.decode("utf-8", "ignore"): 
                  if self.debug: print('found ok, breaking')
-                 self.isOk = True
+                 isItOk = True
                  break
         else:
-               time.sleep(read_timeout) 
+               time.sleep(read_timeout)  
         quantity = ser_printer.inWaiting()
         #if quantity == 0:
                #if self.debug: print('-------> No lines to read out')
@@ -194,7 +178,7 @@ class MyWindow(object):
                #raise ImportError()
                #break
     if self.debug: print('resulting answer: ', answer)
-    return answer
+    return isItOk
 
 
 #-------------------------------------------------------------------------
