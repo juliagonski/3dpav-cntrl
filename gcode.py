@@ -30,9 +30,8 @@ def g_init(self,debug=False):
   self.printer.write(str.encode('G28 Y Z\n'))
   if debug: print(";M400")
   self.printer.write(str.encode('M400\n'))
-  self.printer.write(str.encode('M400\n'))
 
-  time.sleep(0.5) #each command should give an immediate okay, except the second M400
+  time.sleep(0.5) #each command should give an immediate okay, except the M400
   self.printer.flush()
   isItOk = self.waitForOk(self.printer)
 
@@ -50,11 +49,15 @@ def g_run(self,lookup,debug=False):
     self.printer.write(str.encode(compress)) 
     self.printer.write(str.encode(decompress)) 
     self.printer.write(str.encode('M400\n'))
-    self.printer.write(str.encode('M400\n'))
   else: 
     print('ERROR!!!! --------------> No ventilation protocol for this choice of settings! Try a different selection.')
     #return ''
 
+  if debug: print('buffer after commands:', self.printer.inWaiting())
+  self.waitForOk(self.printer)
+  time.sleep(0.5) #each command should give an immediate okay, except the M400
+  self.printer.flush()
+  if debug: print('buffer after sleep/flush:', self.printer.inWaiting())
   if debug: print('g_run, isOk: ', self.isOk)
   isItOk = self.waitForOk(self.printer)
   if debug: print('done with thread, setting threadDone and updating self.isOk')

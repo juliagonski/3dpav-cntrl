@@ -16,7 +16,7 @@ from gcode import *
 # example for 115200 baud rate:
 # 0.1 + 1.0 / 115200 * 10.0 * 10.0 ~ 0.1 sec
 #read_timeout = 0.2 #as of June 17, this is too long
-read_timeout = 2 #"fine-tuned" for June 19
+read_timeout = 0.1 #"fine-tuned" for June 19
 baudRate = 115200
 
 class MyWindow(object):
