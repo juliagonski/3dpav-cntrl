@@ -16,12 +16,9 @@ from gcode import *
 # example for 115200 baud rate:
 # 0.1 + 1.0 / 115200 * 10.0 * 10.0 ~ 0.1 sec
 #read_timeout = 0.2 #as of June 17, this is too long
-read_timeout = 3
+read_timeout = 2 #"fine-tuned" for June 19
 baudRate = 115200
 
-#class MyWindow(Frame):
-#  def __init__(self, master=None):
-#    Frame.__init__(self, master)
 class MyWindow(object):
   def __init__(self, win,debug=False):  
     self.debug = debug
@@ -29,8 +26,6 @@ class MyWindow(object):
     self.lab.place(x=60, y=20)
     self.txtfld=Entry(win, text="Serial port")
     self.txtfld.place(x=150, y=20)
-    #self.place_btn(win,"Connect printer", self.connect,60,50)
-    #self.place_btn(win,"Initialize run", self.initialize,60,130)
     self.btn_cnct=Button(win, text="Connect printer", command=self.connect)
     self.btn_cnct.place(x=60, y=50)
     self.btn_init=Button(win, text="Initialize", command=self.initialize, state=DISABLED)
@@ -70,10 +65,6 @@ class MyWindow(object):
     self.printer = None
     self.lookup = None
     self.started_run = False
-
-    # initial time display
-    #self.check_run(win)
-    # a smarter way to do this ! 
     self._isOk = False
 
   @property 
@@ -82,13 +73,10 @@ class MyWindow(object):
 
   @isOk.setter
   def isOk(self, new_value):
-    print('isOk being updated to '+str(new_value))
+    if self.debug: print('isOk being updated to '+str(new_value))
     self._isOk = new_value
-    #if self.started_run and new_value == True: 
     if self.started_run and new_value == True: 
-      print('adding another run thread with '+str(self.lookup))
-      #_thread.start_new_thread(g_run, (self, self.lookup, self.debug))
-      #threading.Thread(target=g_run(self,self.lookup, self.debug)).start()
+      if self.debug: print('adding another run thread with '+str(self.lookup))
       t = Thread(target = g_run, args =(self,self.lookup,self.debug )) 
       t.start() 
       t.join()
@@ -144,10 +132,9 @@ class MyWindow(object):
     sel_rr=self.rr.get()
     sel_ie=self.ie.get()
     self.lookup = sel_tv+"mL_"+sel_rr+"BPM_"+sel_ie
-    #self.lookup = sel_tv+"mL_"+sel_rr+"BPM"
     print('Started new protocol: '+str(self.lookup))
     self.btn_stop["state"] = "normal"
-    #g_run(self, self.lookup, self.debug)
+    #Start first thread, join subsequent ones 
     t_orig = Thread(target = g_run, args =(self,self.lookup,self.debug )) 
     t_orig.start() 
 
@@ -161,7 +148,6 @@ class MyWindow(object):
     isItOk = False
     answer = ''
     quantity = ser_printer.inWaiting()
-    #ser_printer.flushOutput()
     while True:
         if quantity > 0:
                answer += ser_printer.read(quantity)

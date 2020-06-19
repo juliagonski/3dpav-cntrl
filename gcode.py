@@ -32,12 +32,9 @@ def g_init(self,debug=False):
   self.printer.write(str.encode('M400\n'))
   self.printer.write(str.encode('M400\n'))
 
-  #answer2 = self.waitForOk(self.printer)
-  time.sleep(0.1) #each command should give an immediate okay, except the second M400
-  self.printer.flushInput()
-  #self.printer.flushOutput()
+  time.sleep(0.5) #each command should give an immediate okay, except the second M400
+  self.printer.flush()
   isItOk = self.waitForOk(self.printer)
-  #print('answer2:', len(answer2),', answer: ', len(answer))
 
   #if 'ok' in answer.decode("utf-8", "ignore"):
   if isItOk:
@@ -55,13 +52,13 @@ def g_run(self,lookup,debug=False):
     self.printer.write(str.encode('M400\n'))
     self.printer.write(str.encode('M400\n'))
   else: 
-    print('ERROR!!!! --------------> No ventilation protocol for this choice of settings!')
+    print('ERROR!!!! --------------> No ventilation protocol for this choice of settings! Try a different selection.')
     #return ''
 
-  print('g_run, isOk: ', self.isOk)
+  if debug: print('g_run, isOk: ', self.isOk)
   isItOk = self.waitForOk(self.printer)
-  print('done with thread, setting threadDone and updating self.isOk')
-  self.isOk = True
+  if debug: print('done with thread, setting threadDone and updating self.isOk')
+  self.isOk = isItOk
   
 
 def g_stop(self,debug=False):
