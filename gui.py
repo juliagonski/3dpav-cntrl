@@ -150,8 +150,10 @@ class MyWindow(object):
     quantity = ser_printer.inWaiting()
     while True:
         if quantity > 0:
-               answer += ser_printer.read(quantity)
-               if 'ok' in answer.decode("utf-8", "ignore"): 
+               #answer += ser_printer.read(quantity)
+               answer += ser_printer.read(quantity).decode("utf-8","ignore")
+               ##if 'ok' in answer.decode("utf-8", "ignore"):
+               if 'ok' in answer:
                  if self.debug: print('found ok, breaking')
                  isItOk = True
                  break
