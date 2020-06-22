@@ -103,8 +103,8 @@ class MyWindow(object):
     print("Connecting to printer...")
     time.sleep(1)  # Allow time for response
     if self.debug: print("Connection response from printer:", ser_printer.read(ser_printer.inWaiting()))
-    ser_printer.write(str.encode('M400\n'))
-    ser_printer.write(str.encode('M400\n'))
+    #ser_printer.write(str.encode('M400\n'))
+    #ser_printer.write(str.encode('M400\n'))
     answer = ser_printer.readline()
 
     if 'ok' in answer.decode("utf-8", "ignore"):
@@ -153,8 +153,9 @@ class MyWindow(object):
                #answer += ser_printer.read(quantity)
                answer += ser_printer.read(quantity).decode("utf-8","ignore")
                ##if 'ok' in answer.decode("utf-8", "ignore"):
-               if 'ok' in answer:
-                 if self.debug: print('found ok, breaking')
+               #deprecated new firmware 0622 if 'ok' in answer:
+               if 'DONE' in answer:
+                 if self.debug: print('found DONE, breaking')
                  isItOk = True
                  break
         else:
