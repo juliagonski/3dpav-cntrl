@@ -34,8 +34,7 @@ def g_init(self,debug=False):
   time.sleep(0.5) #each command should give an immediate okay, except the M400
   self.printer.flush()
   isItOk = self.waitForOk(self.printer)
-
-  #if 'ok' in answer.decode("utf-8", "ignore"):
+  if 'ok' in answer.decode("utf-8", "ignore"):
   if isItOk:
     print("------ Done initializing!")
     print("")
@@ -60,7 +59,7 @@ def g_run(self,lookup,debug=False):
   #self.printer.flush()
   #if debug: print('buffer after sleep/flush:', self.printer.inWaiting())
   #if debug: print('g_run, isOk: ', self.isOk)
-  isItOk = self.waitForOk(self.printer)
+  isItOk = self.waitForDONE(self.printer)
   if debug: print('done with thread, setting threadDone and updating self.isOk')
   self.isOk = isItOk
   

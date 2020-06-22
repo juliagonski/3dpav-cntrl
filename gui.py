@@ -153,6 +153,31 @@ class MyWindow(object):
                #answer += ser_printer.read(quantity)
                answer += ser_printer.read(quantity).decode("utf-8","ignore")
                ##if 'ok' in answer.decode("utf-8", "ignore"):
+               if 'ok' in answer:
+                 if self.debug: print('found DONE, breaking')
+                 isItOk = True
+                 break
+        else:
+               time.sleep(read_timeout)  
+        quantity = ser_printer.inWaiting()
+        #if quantity == 0:
+               #if self.debug: print('-------> No lines to read out')
+               #print('ERROR connecting!!!')
+               #raise ImportError()
+               #break
+    if self.debug: print('resulting answer: ', answer)
+    return isItOk
+
+  def waitForDONE(self, ser_printer):
+    if self.debug: print('BEGIN waitForDONE')
+    isItOk = False
+    answer = ''
+    quantity = ser_printer.inWaiting()
+    while True:
+        if quantity > 0:
+               #answer += ser_printer.read(quantity)
+               answer += ser_printer.read(quantity).decode("utf-8","ignore")
+               ##if 'ok' in answer.decode("utf-8", "ignore"):
                #deprecated new firmware 0622 if 'ok' in answer:
                if 'DONE' in answer:
                  if self.debug: print('found DONE, breaking')
