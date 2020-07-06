@@ -60,7 +60,7 @@ def g_run(self,lookup,debug=False):
   #if debug: print('buffer after sleep/flush:', self.printer.inWaiting())
   #if debug: print('g_run, isOk: ', self.isOk)
   isItOk = self.waitForDONE(self.printer)
-  if debug: print('done with thread, setting threadDone and updating self.isOk')
+  if debug: print('done with one ventilation, updating self.isOk')
   self.isOk = isItOk
   
 
